@@ -9,6 +9,7 @@ ENV AUTH_SERVICE_URL=http://localhost:8080
 # Copy the source from the current directory to the Working Directory inside the container
 COPY ./auth /auth
 COPY ./bank /bank
+COPY ./httputils /httputils
 
 WORKDIR /bank
 # Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed

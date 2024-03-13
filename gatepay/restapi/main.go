@@ -18,6 +18,8 @@ var (
 )
 
 func main() {
+	flag.Parse()
+
 	h := handler.NewPaymentHandler(*authHost)
 	r := router.New(h)
 
