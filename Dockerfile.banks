@@ -1,0 +1,24 @@
+FROM golang:1.22-bullseye
+
+# set the environment variable for port
+ENV PORT=80
+ENV AUTH_SERVICE_URL=http://localhost:8080
+
+# Set the Current Working Directory inside the container
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY ./auth /auth
+COPY ./bank /bank
+
+WORKDIR /bank
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Build the Go app
+RUN go build -o bank restapi/main.go
+
+# Expose port from environment variable
+EXPOSE $PORT
+
+# Command to run the executable
+CMD ./bank --port $PORT --auth-server $AUTH_SERVICE_URL

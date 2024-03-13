@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:latest
+    container_name: "${DB_CONTAINER}"
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    environment:
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_DB: "${DB_NAME}"
+    restart: unless-stopped
+
+  auth:
+    build:
+      context: ./
+      dockerfile: Dockerfile.auth
+    ports:
+      - "8080:80"
+
+  bank:
+    build:
+      context: ./
+      dockerfile: Dockerfile.banks
+    ports:
+      - "8081:80"
+    environment:
+      - AUTH_SERVICE_URL=http://auth
+    depends_on:
+      - auth
+
+  gatepay:
+    build:
+      context: ./
+      dockerfile: Dockerfile.gatepay
+    ports:
+      - "8082:80"
+    environment:
+      - AUTH_SERVICE_URL=http://auth
+      - BANK_SERVICE_URL=http://bank
+    depends_on:
+      - auth
+      - bank

@@ -1,0 +1,32 @@
+FROM golang:1.22-bullseye
+
+# set the environment variable for port
+ENV PORT=80
+ENV BANK_SERVICE_URL=http://localhost:8081
+ENV AUTH_SERVICE_URL=http://localhost:8080
+ENV PATH=$PATH:/root/go/bin
+
+# Set the Current Working Directory inside the container
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY ./bank /bank
+COPY ./gatepay /gatepay
+
+WORKDIR /gatepay
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# install enumer
+RUN go get -u github.com/dmarkham/enumer@latest
+
+# generate enums
+RUN go generate ./...
+
+# Build the Go app
+RUN go build -o gatepay restapi/main.go
+
+# Expose port from environment variable
+EXPOSE $PORT
+
+# Command to run the executable
+CMD ./gatepay --port $PORT --bank-server $BANK_SERVICE_URL --auth-server $AUTH_SERVICE_URL

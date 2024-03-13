@@ -1,0 +1,22 @@
+FROM golang:1.22-bullseye
+
+# set the environment variable for port
+ENV PORT=80
+
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY ./auth .
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Build the Go app
+RUN go build -o auth .
+
+# Expose port from environment variable
+EXPOSE $PORT
+
+# Command to run the executable
+CMD ./auth --port $PORT
