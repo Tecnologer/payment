@@ -29,11 +29,11 @@ build-all: build-auth build-bank
 build-n-run-migrator: build-migrator run-migrator
 
 run-migrator:
-	./dist/migrator --db-name $(LOCAL_DB) \
-					--db-user $(LOCAL_DB_USER) \
-					--db-pass $(LOCAL_DB_PASSWORD) \
-					--db-host $(LOCAL_DB_HOST) \
-					--db-port $(LOCAL_DB_PORT)
+	./dist/migrator -db-name $(DB_NAME) \
+					-db-user $(DB_USER) \
+					-db-pass $(DB_PASSWORD) \
+					-db-host $(DB_HOST) \
+					-db-port $(DB_PORT)
 
 build-migrator:
 	cd gatepay && go build -o ../dist/migrator ./migrator/main.go

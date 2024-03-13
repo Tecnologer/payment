@@ -39,6 +39,7 @@ func main() {
 		&models2.Customer{},
 		&models2.Item{},
 		&models2.Merchant{},
+		&models2.MerchantUser{},
 		&models2.Payment{},
 		&models2.PaymentItem{},
 		&models2.PaymentMethod{},

@@ -43,6 +43,10 @@ func customers(db *gorm.DB) error {
 	}
 
 	for _, customer := range customersData {
+		if existsCustomer(db, customer.Person.Email) {
+			continue
+		}
+
 		tx := db.Save(customer)
 		if tx.Error != nil {
 			return errors.Wrapf(tx.Error, "seeder.customers: saving customer %s", customer.Person.Email)
@@ -50,6 +54,12 @@ func customers(db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func existsCustomer(db *gorm.DB, email string) bool {
+	var customer *models.Customer
+	tx := db.Where("email = ?", email).First(&customer)
+	return tx.Error == nil
 }
 
 func merchants(db *gorm.DB) error {
@@ -85,12 +95,20 @@ func merchants(db *gorm.DB) error {
 	var tx *gorm.DB
 
 	for _, merchant := range merchantsData {
+		if existsMerchant(db, merchant.Name) {
+			continue
+		}
+
 		tx = db.Save(merchant)
 		if tx.Error != nil {
 			return errors.Wrapf(tx.Error, "seeder.merchants: saving merchant %s", merchant.Name)
 		}
 
 		for _, user := range merchant.Users {
+			if existsMerchantUser(db, user.Person.Email) {
+				continue
+			}
+
 			user.MerchantID = merchant.ID
 
 			tx = db.Save(user)
@@ -106,4 +124,16 @@ func merchants(db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func existsMerchant(db *gorm.DB, name string) bool {
+	var merchant *models.Merchant
+	tx := db.Where("name = ?", name).First(&merchant)
+	return tx.Error == nil
+}
+
+func existsMerchantUser(db *gorm.DB, email string) bool {
+	var user *models.MerchantUser
+	tx := db.Where("email = ?", email).First(&user)
+	return tx.Error == nil
 }

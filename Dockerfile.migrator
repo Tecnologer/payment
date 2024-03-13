@@ -1,0 +1,28 @@
+FROM golang:1.22-bullseye
+
+COPY ./auth /auth
+COPY ./bank /bank
+COPY ./httputils /httputils
+COPY ./gatepay /gatepay
+COPY ./Makefile /Makefile
+
+# Download the dependencies.
+WORKDIR /gatepay
+RUN go mod download
+RUN go mod tidy
+
+RUN go build -o /dist/migrator /gatepay/migrator/main.go
+
+CMD ["/bin/sh"]
+
+WORKDIR /
+
+# Install make if it's not available in your base image
+#RUN apt-get update && apt-get install -y make
+#
+#RUN echo "** env vars: DB_NAME=$DB_NAME, DB_USER=$DB_USER, DB_PASSWORD=$DB_PASSWORD, DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_SSLMODE=$DB_SSLMODE"
+## Build make migrator
+#RUN make build-migrator
+#
+## Run the migrator
+#RUN make run-migrator
