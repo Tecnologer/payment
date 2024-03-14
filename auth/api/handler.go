@@ -1,23 +1,22 @@
-package handler
+package api
 
 import (
 	"net/http"
 
-	"deuna.com/payment/auth/api"
 	"github.com/pkg/errors"
 )
 
-type Handler struct {
-	Auth *api.Auth
+type AuthHandler struct {
+	Auth *Auth
 }
 
-func New(authHost string) *Handler {
-	return &Handler{
-		Auth: api.NewAuth(authHost),
+func NewAuthHandler(authHost string) *AuthHandler {
+	return &AuthHandler{
+		Auth: NewAuth(authHost),
 	}
 }
 
-func (h *Handler) getTokenUser(r *http.Request) (string, error) {
+func (h *AuthHandler) EmailFromToken(r *http.Request) (string, error) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		return "", errors.New("bank.handler.get_token_user: missing token")
@@ -28,10 +27,14 @@ func (h *Handler) getTokenUser(r *http.Request) (string, error) {
 		return "", errors.Wrap(err, "bank.handler.get_token_user: getting claim")
 	}
 
+	if claim == nil {
+		return "", errors.New("bank.handler.get_token_user: unauthorized token")
+	}
+
 	return claim.Username, nil
 }
 
-func (h *Handler) isTokenValid(r *http.Request) (bool, error) {
+func (h *AuthHandler) IsTokenValid(r *http.Request) (bool, error) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		return false, errors.New("bank.handler.is_token_valid: missing token")

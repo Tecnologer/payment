@@ -2,7 +2,6 @@ package models
 
 import (
 	"deuna.com/payment/bank/errors"
-	"deuna.com/payment/bank/models/interfaces"
 )
 
 type Client struct {
@@ -10,17 +9,17 @@ type Client struct {
 }
 
 type Account struct {
-	Client   *Client         `json:"client"`
-	BankName interfaces.Bank `json:"bank_name"`
-	Number   string          `json:"number"`
-	Balance  float32         `json:"balance"`
+	Client   *Client `json:"client"`
+	BankName string  `json:"bank_name"`
+	Number   string  `json:"number"`
+	Balance  float32 `json:"balance"`
 }
 
 func (a *Account) GetID() string {
 	return a.Number
 }
 
-func (a *Account) GetBank() interfaces.Bank {
+func (a *Account) GetBankName() string {
 	return a.BankName
 }
 
@@ -46,4 +45,8 @@ func (a *Account) Deposit(amount float32) error {
 	a.Balance += amount
 
 	return nil
+}
+
+func (a *Account) GetOwnerName() string {
+	return a.Client.Name
 }

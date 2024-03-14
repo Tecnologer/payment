@@ -2,5 +2,5 @@ package models
 
 type Customer struct {
 	*Person
-	PaymentHistory []*Payment `json:"payment_history" gorm:"foreignKey:CustomerID;"`
+	PaymentMethods []*PaymentMethod `json:"payment_methods" gorm:"foreignKey:CustomerID;"`
 }

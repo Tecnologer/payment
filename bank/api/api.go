@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"deuna.com/payment/bank/constants"
+
 	"deuna.com/payment/httputils"
 
 	"deuna.com/payment/bank/models"
@@ -14,28 +16,31 @@ import (
 )
 
 type BankService struct {
-	host string
+	router
 }
 
 func NewBankService(host string) *BankService {
 	return &BankService{
-		host: host,
+		router: newRouter(host),
 	}
 }
 
-func (b *BankService) GetAccount(bankName, accountNumber string) (interfaces.Account, error) {
-	accountInfo := map[string]string{
-		"bank_name": bankName,
-		"number":    accountNumber,
-	}
-
-	req, err := json.Marshal(accountInfo)
+func (b *BankService) GetAccount(request *AccountRequest) (interfaces.Account, error) {
+	reqBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, errors.Wrap(err, "api.bank_service.get_account: marshaling account info")
 	}
 
-	// Call to bank service
-	res, err := http.Post(b.host+"/get-account", "application/json", bytes.NewBuffer(req))
+	req, err := http.NewRequest(http.MethodPost, b.buildPath(constants.GetAccountEndPoint), bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, errors.Wrap(err, "api.bank_service.get_account: creating request")
+	}
+
+	request.PrepareRequestHeaders(req)
+
+	httpClient := &http.Client{}
+
+	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "api.bank_service.get_account: calling bank service")
 	}
@@ -52,4 +57,31 @@ func (b *BankService) GetAccount(bankName, accountNumber string) (interfaces.Acc
 	}
 
 	return account, nil
+}
+
+func (b *BankService) Transfer(request *TransferRequest) error {
+	reqBody, err := json.Marshal(request)
+	if err != nil {
+		return errors.Wrap(err, "api.bank_service.transfer: marshaling transfer info")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, b.buildPath(constants.TransferEndPoint), bytes.NewBuffer(reqBody))
+	if err != nil {
+		return errors.Wrap(err, "api.bank_service.get_account: creating request")
+	}
+
+	request.PrepareRequestHeaders(req)
+
+	httpClient := &http.Client{}
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "api.bank_service.get_account: calling bank service")
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return httputils.RetrieveError(res)
+	}
+
+	return nil
 }

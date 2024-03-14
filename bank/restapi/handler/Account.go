@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
+
+	"deuna.com/payment/auth/api"
+
 	"deuna.com/payment/bank/factory"
 
 	"github.com/pkg/errors"
@@ -14,17 +18,17 @@ import (
 )
 
 type AccountHandler struct {
-	*Handler
+	*api.AuthHandler
 }
 
 func NewAccountHandler(authHost string) *AccountHandler {
 	return &AccountHandler{
-		Handler: New(authHost),
+		AuthHandler: api.NewAuthHandler(authHost),
 	}
 }
 
 func (h *AccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
-	isAuthorized, err := h.isTokenValid(r)
+	isAuthorized, err := h.IsTokenValid(r)
 	if err != nil {
 		httputils.WriteInternalServerError(w, errors.Wrap(err, "bank.account_handler.get_account: validating token"))
 
@@ -46,6 +50,12 @@ func (h *AccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = viewAccount.Validate(); err != nil {
+		httputils.WriteBadRequest(w, errors.Wrap(err, "bank.account_handler.get_account: validating account"))
+
+		return
+	}
+
 	bank := factory.NewBank(viewAccount.BankName)
 	if bank == nil {
 		httputils.WriteBadRequest(w, errors.Errorf("bank not found: %s", viewAccount.BankName))
@@ -56,6 +66,22 @@ func (h *AccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
 	account, err := bank.GetAccount(viewAccount.Number)
 	if err != nil {
 		httputils.WriteInternalServerError(w, errors.Wrap(err, "bank.account_handler.get_account: getting account"))
+
+		return
+	}
+
+	if account.GetOwnerName() != viewAccount.OwnerName {
+		logrus.Infof("the account exists but the owner name is different: %s", viewAccount.OwnerName)
+
+		httputils.WriteBadRequest(
+			w,
+			errors.Errorf(
+				"there is not account with number %s and owner %s for bank %s",
+				viewAccount.Number,
+				viewAccount.OwnerName,
+				viewAccount.BankName,
+			),
+		)
 
 		return
 	}

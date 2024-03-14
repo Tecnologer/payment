@@ -5,28 +5,25 @@ import (
 )
 
 type Payment struct {
-	Amount             float32               `json:"amount"`
-	Items              []*models.PaymentItem `json:"items"`
-	OriginAccount      *Account              `json:"origin_account"`
-	DestinationAccount *Account              `json:"destination_account"`
+	OriginPaymentMethodID      uint           `json:"origin_payment_method_id"`
+	DestinationPaymentMethodID uint           `json:"destination_payment_method_id"`
+	Amount                     float32        `json:"amount"`
+	Items                      []*models.Item `json:"items"`
 }
 
-type Account struct {
-	Number   string `json:"number"`
-	BankName string `json:"bank_name"`
-}
-
-func (p *Payment) ToPaymentModel() *models.Payment {
-	return &models.Payment{
-		Amount: p.Amount,
-		OriginPaymentMethod: &models.PaymentMethod{
-			AccountNumber: p.OriginAccount.Number,
-			BankName:      p.OriginAccount.BankName,
-		},
-		DestinationPaymentMethod: &models.PaymentMethod{
-			AccountNumber: p.DestinationAccount.Number,
-			BankName:      p.DestinationAccount.BankName,
-		},
-		Items: p.Items,
+func (p *Payment) ParseToModelPayment() *models.Payment {
+	payment := &models.Payment{
+		OriginPaymentMethodID:      p.OriginPaymentMethodID,
+		DestinationPaymentMethodID: p.DestinationPaymentMethodID,
+		Amount:                     p.Amount,
+		Items:                      make([]*models.PaymentItem, len(p.Items)),
 	}
+
+	for i, item := range p.Items {
+		payment.Items[i] = &models.PaymentItem{
+			Item: item,
+		}
+	}
+
+	return payment
 }

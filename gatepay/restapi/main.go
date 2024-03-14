@@ -20,7 +20,9 @@ var (
 func main() {
 	flag.Parse()
 
-	h := handler.NewPaymentHandler(*authHost)
+	logrus.SetLevel(logrus.DebugLevel)
+
+	h := handler.NewPaymentHandler(*authHost, *bankHost)
 	r := router.New(h)
 
 	host := fmt.Sprintf(":%d", *port)

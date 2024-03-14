@@ -13,4 +13,15 @@ type MerchantUser struct {
 	*Person
 	Role       MerchantRole `json:"role"`
 	MerchantID uint         `json:"merchant_id"`
+	Merchant   *Merchant    `json:"merchant"    gorm:"foreignKey:MerchantID"`
+}
+
+func (mu *Merchant) EmailBelongsToMerchant(email string) bool {
+	for _, user := range mu.Users {
+		if user.Email == email {
+			return true
+		}
+	}
+
+	return false
 }

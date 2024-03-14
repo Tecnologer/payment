@@ -58,6 +58,10 @@ func buildError(err error) []byte {
 }
 
 func buildResponse(response interface{}) []byte {
+	if response == nil {
+		return []byte{}
+	}
+
 	responseBytes, _ := json.Marshal(response)
 
 	return responseBytes

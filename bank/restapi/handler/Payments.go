@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	authApi "deuna.com/payment/auth/api"
+
 	"deuna.com/payment/httputils"
 
 	"deuna.com/payment/bank/factory"
@@ -12,12 +14,12 @@ import (
 )
 
 type PaymentHandler struct {
-	*Handler
+	*authApi.AuthHandler
 }
 
 func NewPaymentHandler(authHost string) *PaymentHandler {
 	return &PaymentHandler{
-		Handler: New(authHost),
+		AuthHandler: authApi.NewAuthHandler(authHost),
 	}
 }
 
@@ -42,7 +44,7 @@ type PaymentSummary struct {
 func (h *PaymentHandler) Payment(w http.ResponseWriter, r *http.Request) {
 	logrus.Debug("payment_handler_payment: start")
 
-	username, err := h.getTokenUser(r)
+	username, err := h.EmailFromToken(r)
 	if err != nil {
 		httputils.WriteUnauthorized(w, errors.Wrap(err, "getting token user"))
 
@@ -81,17 +83,7 @@ func (h *PaymentHandler) doPayment(payment *Payment) error {
 		return errors.Errorf("destination bank %s not found", payment.DestinationBank)
 	}
 
-	originAccount, err := originBank.GetAccount(payment.OriginAccount)
-	if err != nil {
-		return errors.Wrapf(err, "getting account %s", payment.OriginAccount)
-	}
-
-	destinationAccount, err := destinationBank.GetAccount(payment.DestinationAccount)
-	if err != nil {
-		return errors.Wrapf(err, "getting destination account %s", payment.DestinationAccount)
-	}
-
-	err = originBank.Payment(originAccount, destinationAccount, payment.Amount)
+	err := originBank.Transfer(payment.OriginAccount, payment.DestinationAccount, payment.Amount)
 	if err != nil {
 		return errors.Wrap(err, "doing payment")
 	}

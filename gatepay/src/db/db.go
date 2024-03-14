@@ -1,6 +1,9 @@
 package db
 
 import (
+	"time"
+
+	gormlogruslogger "github.com/aklinkert/go-gorm-logrus-logger"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,5 +18,12 @@ func NewConnection(config Config) (*gorm.DB, error) {
 
 	logrus.Debugf("connecting to database: %s", dsn)
 
-	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	logger := gormlogruslogger.NewGormLogrusLogger(
+		logrus.StandardLogger().WithField("component", "gorm"),
+		100*time.Millisecond,
+	)
+
+	return gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger,
+	})
 }

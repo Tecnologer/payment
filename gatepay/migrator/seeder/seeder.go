@@ -58,8 +58,8 @@ func customers(db *gorm.DB) error {
 
 func existsCustomer(db *gorm.DB, email string) bool {
 	var customer *models.Customer
-	tx := db.Where("email = ?", email).First(&customer)
-	return tx.Error == nil
+
+	return db.Where("email = ?", email).First(&customer).Error == nil
 }
 
 func merchants(db *gorm.DB) error {
@@ -87,6 +87,18 @@ func merchants(db *gorm.DB) error {
 						Email: "taylor.smith@nexusinnovate.com",
 					},
 					Role: models.SuperAdmin,
+				},
+			},
+		},
+		{
+			Name: "Deuna",
+			Users: []*models.MerchantUser{
+				{
+					Person: &models.Person{
+						Name:  "Benjamin Button",
+						Email: "bbutton@deuna.com",
+					},
+					Role: models.Manager,
 				},
 			},
 		},
@@ -128,12 +140,12 @@ func merchants(db *gorm.DB) error {
 
 func existsMerchant(db *gorm.DB, name string) bool {
 	var merchant *models.Merchant
-	tx := db.Where("name = ?", name).First(&merchant)
-	return tx.Error == nil
+
+	return db.Where("name = ?", name).First(&merchant).Error == nil
 }
 
 func existsMerchantUser(db *gorm.DB, email string) bool {
 	var user *models.MerchantUser
-	tx := db.Where("email = ?", email).First(&user)
-	return tx.Error == nil
+
+	return db.Where("email = ?", email).First(&user).Error == nil
 }

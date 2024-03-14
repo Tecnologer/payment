@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"deuna.com/payment/httputils"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 
@@ -108,23 +110,16 @@ func validate(w http.ResponseWriter, r *http.Request) {
 
 	claims, err := validateToken(token)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
 		logrus.WithError(err).Error("auth_api_validate: validating token")
+
+		httputils.WriteUnauthorized(w, errors.Wrap(err, "auth_api_validate: validating token"))
 
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	err = json.NewEncoder(w).Encode(claims)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		logrus.WithError(err).Error("auth_api_validate: encoding claims")
-
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	httputils.WriteOK(w, claims)
 }
 
 func validateToken(tokenString string) (*models.Claim, error) {

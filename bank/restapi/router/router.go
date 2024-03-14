@@ -3,6 +3,8 @@ package router
 import (
 	"net/http"
 
+	"deuna.com/payment/bank/constants"
+
 	"deuna.com/payment/bank/restapi/handler"
 	"github.com/gorilla/mux"
 )
@@ -13,8 +15,8 @@ func New(authServer string) http.Handler {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/payment", paymentHandler.Payment).Methods("POST")
-	router.HandleFunc("/get-account", accountHandler.GetAccount).Methods("POST")
+	router.HandleFunc(constants.TransferEndPoint, paymentHandler.Payment).Methods("POST")
+	router.HandleFunc(constants.GetAccountEndPoint, accountHandler.GetAccount).Methods("POST")
 
 	return router
 }

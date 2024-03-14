@@ -2,7 +2,8 @@ package interfaces
 
 type Account interface {
 	GetID() string
-	GetBank() Bank
+	GetBankName() string
 	Withdraw(amount float32) error
 	Deposit(amount float32) error
+	GetOwnerName() string
 }

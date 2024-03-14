@@ -1,6 +1,10 @@
 package service
 
-import "deuna.com/payment/bank/models/interfaces"
+import (
+	"context"
+
+	"deuna.com/payment/bank/models/interfaces"
+)
 
 type BankServiceMock byte
 
@@ -12,37 +16,34 @@ func NewBankMock() Banker {
 	return new(BankServiceMock)
 }
 
-type BankMockModel struct {
-	Name string
-}
-
-func (b *BankMockModel) GetName() string {
-	return b.Name
-}
-func (b *BankMockModel) GetAccount(accountNumber string) (interfaces.Account, error) {
+func (b *BankServiceMock) GetAccount(
+	ctx context.Context,
+	ownerName, bankName, number string,
+) (interfaces.Account, error) {
 	return &Account{
-		BankName: b.Name,
-		Number:   accountNumber,
+		BankName:  bankName,
+		Number:    number,
+		OwnerName: ownerName,
 	}, nil
 }
 
-func (b *BankMockModel) Payment(origin, destination interfaces.Account, amount float32) error {
+func (b *BankServiceMock) Transfer(ctx context.Context, origin, destination interfaces.Account, amount float32) error {
+	// TODO: implement transfer
 	return nil
 }
 
 type Account struct {
-	BankName string
-	Number   string
+	BankName  string
+	Number    string
+	OwnerName string
 }
 
 func (b *Account) GetID() string {
 	return "mock-account"
 }
 
-func (b *Account) GetBank() interfaces.Bank {
-	return &BankMockModel{
-		Name: b.BankName,
-	}
+func (b *Account) GetBankName() string {
+	return b.BankName
 }
 
 func (b *Account) Withdraw(amount float32) error {
@@ -53,9 +54,6 @@ func (b *Account) Deposit(amount float32) error {
 	return nil
 }
 
-func (b *BankServiceMock) GetAccount(bankName, accountNumber string) (interfaces.Account, error) {
-	return &Account{
-		BankName: bankName,
-		Number:   accountNumber,
-	}, nil
+func (b *Account) GetOwnerName() string {
+	return b.OwnerName
 }

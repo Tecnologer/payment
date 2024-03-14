@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"deuna.com/payment/httputils"
 	"encoding/json"
 	"net/http"
 
@@ -89,6 +90,8 @@ func (a *Auth) GetClaim(token string) (*models.Claim, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
+		logrus.WithError(httputils.RetrieveError(res)).Error("auth_api.get_claim: invalid status code")
+
 		return nil, nil
 	}
 

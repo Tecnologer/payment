@@ -1,8 +1,10 @@
 package service
 
 import (
-	"github.com/pkg/errors"
+	"context"
 	"os"
+
+	"github.com/pkg/errors"
 
 	"github.com/sirupsen/logrus"
 
@@ -21,7 +23,8 @@ func DefaultBankService() Banker {
 }
 
 type Banker interface {
-	GetAccount(bankName, accountNumber string) (interfaces.Account, error)
+	GetAccount(ctx context.Context, ownerName, bankName, number string) (interfaces.Account, error)
+	Transfer(ctx context.Context, origin, destination interfaces.Account, amount float32) error
 }
 
 type Bank struct {
@@ -31,7 +34,7 @@ type Bank struct {
 func NewBankService() Banker {
 	bankServerURL := os.Getenv("BANK_SERVER_URL")
 	if bankServerURL == "" {
-		logrus.Infof("BANK_SERVER_URL not found, using default localhost:8080")
+		logrus.Warning("BANK_SERVER_URL not found, using default localhost:8080")
 
 		bankServerURL = "http://localhost:8080"
 	}
@@ -41,11 +44,24 @@ func NewBankService() Banker {
 	}
 }
 
-func (b *Bank) GetAccount(bankName, accountNumber string) (interfaces.Account, error) {
-	account, err := b.api.GetAccount(bankName, accountNumber)
+func (b *Bank) GetAccount(ctx context.Context, ownerName, bankName, number string) (interfaces.Account, error) {
+	request := api.NewAccountRequest(ctx, ownerName, bankName, number)
+
+	account, err := b.api.GetAccount(request)
 	if err != nil {
 		return nil, errors.Wrap(err, "service.bank.get_account: getting account")
 	}
 
 	return account, nil
+}
+
+func (b *Bank) Transfer(ctx context.Context, origin, destination interfaces.Account, amount float32) error {
+	request := api.NewTransferRequest(ctx, origin, destination, amount)
+
+	err := b.api.Transfer(request)
+	if err != nil {
+		return errors.Wrap(err, "service.bank.transfer: transferring money")
+	}
+
+	return nil
 }

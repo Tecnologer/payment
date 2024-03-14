@@ -10,6 +10,12 @@ LOCAL_DB_HOST=localhost
 LOCAL_DB_PORT=5432
 DB_CONTAINER=gatepay-db
 
+build-gatepay:
+	cd ./gatepay && go build -o ../dist/gatepay ./restapi/main.go
+
+run-gatepay:
+	./dist/gatepay --auth-server http://localhost:8080 --bank-server http://localhost:8081
+
 run-auth:
 	./dist/auth --port $(AUTH_PORT)
 
