@@ -10,7 +10,7 @@
 			"name": "auth",
 			"item": [
 				{
-					"name": "login",
+					"name": "login-customer",
 					"event": [
 						{
 							"listen": "test",
@@ -28,7 +28,45 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"deuna\",\n    \"password\": \"S3cre3t**123\"\n}\n",
+							"raw": "{\n    \"username\": \"jnommensen@gmail.com\",\n    \"password\": \"S3cre3t**123\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auth_url}}/login",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login-merchant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"pm.collectionVariables.set(\"auth_token\", response.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"bbutton@deuna.com\",\n    \"password\": \"S3cre3t**123\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -54,11 +92,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Your test name\", function () {",
-									"    var response = pm.response.json();",
-									"",
-									"    pm.collectionVariables.set(\"auth_token\", response.token);",
-									"});"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -104,7 +138,7 @@
 			"name": "bank",
 			"item": [
 				{
-					"name": "payment",
+					"name": "transfer",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -140,7 +174,7 @@
 					"response": []
 				},
 				{
-					"name": "get-account",
+					"name": "get-account-customer",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -156,7 +190,43 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"bank_name\": \"bbva\",\n    \"number\": \"123456\"\n}",
+							"raw": "{\n    \"bank_name\": \"bbva\",\n    \"number\": \"123456\",\n    \"owner_name\": \"John Nommensen\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bank_api_url}}/get-account",
+							"host": [
+								"{{bank_api_url}}"
+							],
+							"path": [
+								"get-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-account-merchant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bank_name\": \"bbva\",\n    \"number\": \"222222\",\n    \"owner_name\": \"Deuna\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -197,7 +267,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"amount\": 1050.00,\t\n\t\"items\": [\n\t\t{\n\t\t\t\"product\": \"Coca-Cola 2L\",\n\t\t\t\"quantity\": 21,\t\n\t\t\t\"price\": 50.00\t\n\t\t}\n\t],\t\n\t\"origin_account\": {\t\n\t\t\"number\": \"1234\",\n\t\t\"bank_name\": \"bbva\"\n\t},\n\t\"destination_account\": {\n\t\t\"number\": \"5678\",\n\t\t\"bank_name\": \"bbva\"\n\t}\n}",
+							"raw": "{\n\t\"origin_payment_method_id\": 1,\n\t\"destination_payment_method_id\": 2,\n\t\"amount\": 1000.00,\n\t\"items\": [\n\t\t{\n\t\t\t\"description\": \"SmartTV 50 inches\",\n\t\t\t\"price\": 1000.00,\n\t\t\t\"quantity\": 1\n\t\t}\n\t]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -211,6 +281,155 @@
 							],
 							"path": [
 								"pay"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-payments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gatepay_url}}/get-payments",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"get-payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add-payment-method-customer",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bank_name\": \"bbva\",\n    \"account_number\": \"123456\",\n    \"name\": \"gold\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatepay_url}}/add-payment-method",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"add-payment-method"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add-payment-method-merchant",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bank_name\": \"bbva\",\n    \"account_number\": \"222222\",\n    \"name\": \"platinum\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatepay_url}}/add-payment-method",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"add-payment-method"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refund-payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{gatepay_url}}/refund-payment/1",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"refund-payment",
+								"1"
 							]
 						}
 					},
