@@ -6,7 +6,7 @@ Online payment platform API-based application focused on e-commerce businesses t
 
 ### 1. Pay
 - **Endpoint:** POST `/pay`
-- **Description:** Initiates a payment process.
+- **Description:** Initiates a payment process for the authenticated user.
 - **Headers:** Authorization: Bearer {{auth_token}}
 - **Request Body:**
   ```json
@@ -26,12 +26,12 @@ Online payment platform API-based application focused on e-commerce businesses t
 
 ### 2. Get Payments
 - **Endpoint:** GET `/get-payments`
-- **Description:** Retrieves processed payments.
+- **Description:** Retrieves processed payments for the authenticated user.
 - **Headers:** Authorization: Bearer {{auth_token}}
 
 ### 3. Add Payment Method - Customer
 - **Endpoint:** POST `/add-payment-method`
-- **Description:** Adds a customer's payment method.
+- **Description:** Adds a customer's payment method to the authenticated user.
 - **Headers:** Authorization: Bearer {{auth_token}}
 - **Request Body:**
   ```json
