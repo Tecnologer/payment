@@ -2,7 +2,15 @@
 
 Deuna Payment is a payment gateway that allows you to accept payments from your customers.
 
-# Pre-requisites and justifications
+## Structure
+
+The project is divided into 3 microservices:
+
+1. [auth](./auth): It's a pretty simple microservice that generates JWT tokens and validates them.
+2. [bank](./bank): It's a microservice that simulates a bank. It allows get accounts and transfers between them.
+3. [gatepay](./gatepay): It's the main microservice. It allows to create, refund and get payments.
+
+## Pre-requisites and justifications
 
 1. [go1.22][5]: I used go1.22 to build the API because it's the last stable version of go.
 2. [enumer][6]: enumer allows to simplify the creation of enums in go. It creates the methods to work with SQL and JSON.
