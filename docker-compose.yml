@@ -58,6 +58,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
-    command: ["make", "run-migrator"]
+    command: ["/wait-for-it.sh", "database:${DB_PORT}", "--", "/dist/migrator", "-db-name", "${DB_NAME}", "-db-user", "${DB_USER}", "-db-pass", "${DB_PASSWORD}", "-db-host", "database", "-db-port", "${DB_PORT}"]
     depends_on:
       - database

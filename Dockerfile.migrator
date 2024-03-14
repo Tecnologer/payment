@@ -1,28 +1,34 @@
 FROM golang:1.22-bullseye
 
+# Copy the source from the current directory to the Working Directory inside the container
 COPY ./auth /auth
 COPY ./bank /bank
 COPY ./httputils /httputils
 COPY ./gatepay /gatepay
+COPY ./wait-for-it.sh /wait-for-it.sh
 COPY ./Makefile /Makefile
 
-# Download the dependencies.
 WORKDIR /gatepay
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 RUN go mod tidy
 
-RUN go build -o /dist/migrator /gatepay/migrator/main.go
+# install enumer
+RUN go install github.com/dmarkham/enumer@latest
+
+# generate enums
+RUN go generate ./...
+
+# install netcat, used in the wait-for-it.sh script
+RUN apt-get update && apt-get install -y netcat
+
+RUN chmod +x /wait-for-it.sh
+
+# Build migrator
+RUN go build -o /dist/migrator ./migrator/main.go
+
+RUN echo ">>>>>>>>>>>>>>>>"
+RUN ls -la /dist
 
 CMD ["/bin/sh"]
-
-WORKDIR /
-
-# Install make if it's not available in your base image
-#RUN apt-get update && apt-get install -y make
-#
-#RUN echo "** env vars: DB_NAME=$DB_NAME, DB_USER=$DB_USER, DB_PASSWORD=$DB_PASSWORD, DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_SSLMODE=$DB_SSLMODE"
-## Build make migrator
-#RUN make build-migrator
-#
-## Run the migrator
-#RUN make run-migrator
