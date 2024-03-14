@@ -3,6 +3,7 @@
 # Variables
 AUTH_PORT=8080
 BANK_PORT=8081
+GATEPAY_PORT=8082
 LOCAL_DB=gatepay
 LOCAL_DB_USER=postgres
 LOCAL_DB_PASSWORD=S3cret*_2024
@@ -14,7 +15,9 @@ build-gatepay:
 	cd ./gatepay && go build -o ../dist/gatepay ./restapi/main.go
 
 run-gatepay:
-	./dist/gatepay --auth-server http://localhost:8080 --bank-server http://localhost:8081
+	./dist/gatepay  --port $(GATEPAY_PORT) \
+					--auth-server http://localhost:$(AUTH_PORT) \
+					--bank-server http://localhost:$(BANK_PORT)
 
 run-auth:
 	./dist/auth --port $(AUTH_PORT)
@@ -25,7 +28,8 @@ build-auth:
 	cd ./auth && go build -o ../dist/auth main.go
 
 run-bank:
-	./dist/bank --port $(BANK_PORT)
+	./dist/bank --port $(BANK_PORT) \
+				--auth-server http://localhost:$(AUTH_PORT)
 
 build-bank:
 	cd ./bank && go build -o ../dist/bank ./restapi/main.go

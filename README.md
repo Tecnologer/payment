@@ -24,18 +24,71 @@ The project is divided into 3 microservices:
 10. [golangci-lint][10]: golangci-lint is a fast linters runner for Go. It runs linters in parallel, uses caching, and works well with all version of Go.
     - I made a gist to easily install and configure golangci-lint. You can find it [here][11].
 
-# Installation
+## Run with Docker
 
 1. Clone the repository
     - `git clone git@github.com:tecnologer/payment.git deuna-payment`
 2. Access the project folder.
    - `cd deuna-payment`
 3. Run composer 
-   - `make docker-run-all`
+   ```shell
+   make docker-run-all`
+   # or
+   docker-compose up --build
+   ```
+## Run manually
 
+1. Clone the repository and access the project folder.
+   ```shell
+   git clone git@github.com:tecnologer/payment.git deuna-payment
+   cd deuna-payment
+   ```
+2. Build and Run the [auth](./auth) microservice
+   ```shell
+    make build-auth 
+    # Default port is 8080, if you want to change it, you can use the ATH_PORT env var.   
+    make run-auth ATH_PORT=8080
+    ``` 
+3. Run the [bank](./bank) microservice 
+   ```shell
+   make build-bank
+   # Default port is 8081, if you want to change it, you can use the BANK_PORT env var.
+   # If auth is running in a different port, you can use the AUTH_PORT env var.
+   make run-bank BANK_PORT=8081 ATH_PORT=8080
+    ``` 
+4. Create the database with Docker
+   ```shell
+   make docker-create-db LOCAL_DB=gatepay \
+                         LOCAL_DB_USER=postgres \
+                         LOCAL_DB_PASSWORD=S3cret*_2024 \
+                         LOCAL_DB_HOST=localhost \
+                         LOCAL_DB_PORT=5432 \
+                         DB_CONTAINER=gatepay-db
+    ``` 
+5. Configure Env Vars, Example:
+   ```shell
+    export DB_PORT=5432
+    export DB_HOST=localhost
+    export DB_PASSWORD=S3cret*_2024
+    export DB_USER=postgres
+    export DB_NAME=gatepay
+    export DB_SSL_MODE=disable
+   ```
+6. Build and Run the [migrations](./gatepay/migrator)
+   ```shell
+   make build-migrator 
+   make run-migrator
+   ``` 
+7. Run the [gatepay](./gatepay) microservice
+   ```shell
+   make build-gatepay
+   # Default port is 8082, if you want to change it, you can use the GATEPAY_PORT env var.
+   # If auth and bank are running in a different port, 
+   # you can use the AUTH_PORT and BANK_PORT env vars.
+   make run-gatepay BANK_PORT=8081 ATH_PORT=8080
+    ``` 
 
-
-# Usage
+## Usage
 
 Use the postman collection for more details on how to use the API.
 
