@@ -20,7 +20,8 @@ import (
 )
 
 var (
-	port = flag.Int("port", 8080, "Port to run the server on")
+	port              = flag.Int("port", 8080, "Port to run the server on")
+	expirationTimeout = flag.Int("expiration-timeout", 15, "Expiration timeout for the token in minutes")
 
 	jwtSecret = "$3cr3t#"
 )
@@ -55,7 +56,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := signToken(&creds)
+	tokenString, err := signToken(time.Duration(*expirationTimeout), &creds)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logrus.WithError(err).Error("getting token")
@@ -78,8 +79,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("User %s logged in successfully", creds.Username)
 }
 
-func signToken(credentials *models.Credential) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+func signToken(expirationTimeout time.Duration, credentials *models.Credential) (string, error) {
+	expirationTime := time.Now().Add(expirationTimeout * time.Minute)
 	claims := &models.Claim{
 		Username: credentials.Username,
 		StandardClaims: jwt.StandardClaims{
