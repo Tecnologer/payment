@@ -5,13 +5,14 @@ import "gorm.io/gorm"
 type Pagination struct {
 	Page     int     `json:"page"`
 	PageSize int     `json:"page_size"`
-	SortBy   string  `json:"sort_by"`
+	OrderBy  string  `json:"order_by"`
 	Filters  Filters `json:"filters"`
 }
 
 func (p *Pagination) Scopes() []func(*gorm.DB) *gorm.DB {
 	return []func(*gorm.DB) *gorm.DB{
 		p.paginationScope,
+		p.sortScope,
 		p.filtersScope,
 	}
 }
@@ -43,4 +44,12 @@ func (p *Pagination) filtersScope(db *gorm.DB) *gorm.DB {
 	}
 
 	return db
+}
+
+func (p *Pagination) sortScope(db *gorm.DB) *gorm.DB {
+	if p.OrderBy == "" {
+		return db
+	}
+
+	return db.Order(p.OrderBy)
 }
