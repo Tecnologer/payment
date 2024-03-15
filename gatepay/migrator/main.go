@@ -6,7 +6,7 @@ import (
 	"deuna.com/payment/gatepay/migrator/seeder"
 
 	db2 "deuna.com/payment/gatepay/src/db"
-	models2 "deuna.com/payment/gatepay/src/models"
+	"deuna.com/payment/gatepay/src/models"
 
 	"github.com/sirupsen/logrus"
 )
@@ -36,13 +36,14 @@ func main() {
 	}
 
 	err = cnn.AutoMigrate(
-		&models2.Customer{},
-		&models2.Item{},
-		&models2.Merchant{},
-		&models2.MerchantUser{},
-		&models2.Payment{},
-		&models2.PaymentItem{},
-		&models2.PaymentMethod{},
+		&models.Customer{},
+		&models.Item{},
+		&models.Merchant{},
+		&models.MerchantUser{},
+		&models.Payment{},
+		&models.PaymentItem{},
+		&models.PaymentMethod{},
+		&models.ActivityLog{},
 	)
 	if err != nil {
 		logrus.WithError(err).Fatal("migrating models")

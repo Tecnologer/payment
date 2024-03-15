@@ -5,4 +5,5 @@ const (
 	AddPaymentMethodEndPoint = "/add-payment-method"
 	GetPaymentsEndPoint      = "/get-payments"
 	RefundPaymentEndPoint    = "/refund-payment/{id}"
+	GetActivityLogEndPoint   = "/get-activity-log"
 )

@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-//go:generate enumer -type=PaymentStatus -json -transform=snake -sql -trimprefix=payment_status
+//go:generate enumer -type=PaymentStatus -json -transform=snake -sql -trimprefix=PaymentStatus
 type PaymentStatus byte
 
 const (

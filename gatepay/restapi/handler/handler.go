@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 
+	"deuna.com/payment/gatepay/src/activityLog"
+
 	"github.com/gorilla/mux"
 
 	"deuna.com/payment/gatepay/restapi/viewmodels"
@@ -232,4 +234,46 @@ func (h *PaymentHandler) RefundPayment(w http.ResponseWriter, r *http.Request) {
 	cnn.Commit()
 
 	httputils.WriteOK(w, nil)
+}
+
+func (h *PaymentHandler) GetActivityLog(w http.ResponseWriter, r *http.Request) {
+	var paginationRequest *activityLog.Pagination
+
+	err := json.NewDecoder(r.Body).Decode(&paginationRequest)
+	if err != nil {
+		logrus.WithError(err).Error("handler.payment.get_activity_log: decoding pagination request")
+		httputils.WriteBadRequest(w, errors.Wrap(err, "decoding pagination request"))
+
+		return
+	}
+
+	cnn, err := db.DefaultConnection()
+	if err != nil {
+		logrus.WithError(err).Error("handler.payment.get_activity_log: getting connection")
+		httputils.WriteInternalServerError(w, errors.Wrap(err, "getting connection"))
+
+		return
+	}
+
+	ctx := httputils.ContextWithToken(r.Context(), r.Header.Get("Authorization"))
+
+	userEmail, err := h.EmailFromToken(r)
+	if err != nil {
+		logrus.WithError(err).Error("handler.payment.get_activity_log: getting token user")
+		httputils.WriteUnauthorized(w, errors.Wrap(err, "getting token user"))
+
+		return
+	}
+
+	paginationRequest.Filters = append(paginationRequest.Filters, activityLog.FilterByUserEmail(userEmail))
+
+	activityLogs, err := business.NewActivityLog(cnn, ctx).Retrieve(paginationRequest)
+	if err != nil {
+		logrus.WithError(err).Error("handler.payment.get_activity_log: getting activity log")
+		httputils.WriteInternalServerError(w, errors.Wrap(err, "getting activity log"))
+
+		return
+	}
+
+	httputils.WriteOK(w, activityLogs)
 }

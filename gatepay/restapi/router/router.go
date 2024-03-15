@@ -17,6 +17,7 @@ func New(h *handler.PaymentHandler) http.Handler {
 	router.HandleFunc(constants.AddPaymentMethodEndPoint, h.AddPaymentMethod).Methods("POST")
 	router.HandleFunc(constants.GetPaymentsEndPoint, h.GetPayments).Methods("GET")
 	router.HandleFunc(constants.RefundPaymentEndPoint, h.RefundPayment).Methods("PUT")
+	router.HandleFunc(constants.GetActivityLogEndPoint, h.GetActivityLog).Methods("POST")
 
 	return router
 }

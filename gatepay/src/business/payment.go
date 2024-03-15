@@ -3,6 +3,8 @@ package business
 import (
 	"context"
 
+	"github.com/sirupsen/logrus"
+
 	"deuna.com/payment/bank/models/interfaces"
 	"deuna.com/payment/gatepay/src/business/dao"
 	"deuna.com/payment/gatepay/src/models"
@@ -18,6 +20,7 @@ type Payment struct {
 	bank             service.Banker
 	daoCustomer      *dao.Customer
 	daoMerchant      *dao.Merchant
+	daoActivityLog   *dao.ActivityLog
 }
 
 type accounts struct {
@@ -33,6 +36,7 @@ func NewPayment(db *gorm.DB, ctx context.Context) *Payment {
 		daoPaymentMethod: dao.NewPaymentMethod(db),
 		daoCustomer:      dao.NewCustomer(db),
 		daoMerchant:      dao.NewMerchant(db),
+		daoActivityLog:   dao.NewActivityLog(db),
 	}
 }
 
@@ -57,12 +61,21 @@ func (p *Payment) Register(customerEmail string, inputPayment *models.Payment) (
 	}
 
 	if customer.Name != accounts.origin.GetOwnerName() {
-		return nil, errors.New("business.payment.register: the account %s does not belong to the customer %s")
+		return nil, errors.Errorf("business.payment.register: the account %s-%s does not belong to the customer %s",
+			accounts.origin.GetBankName(),
+			accounts.origin.GetID(),
+			customerEmail,
+		)
 	}
 
 	newPayment, err := p.dao.Insert(inputPayment)
 	if err != nil {
 		return nil, errors.Wrap(err, "business.payment.register: inserting payment")
+	}
+
+	err = p.daoActivityLog.RegisterPayment(customerEmail, newPayment)
+	if err != nil {
+		logrus.WithError(err).Error("business.payment.register: registering new payment in activity log")
 	}
 
 	if err := p.bank.Transfer(p.Context, accounts.origin, accounts.destination, inputPayment.Amount); err != nil {
@@ -157,6 +170,11 @@ func (p *Payment) Refund(userEmail string, paymentID uint) error {
 	err = p.dao.Refund(paymentID)
 	if err != nil {
 		return errors.Wrap(err, "business.payment.refund: refunding payment")
+	}
+
+	err = p.daoActivityLog.RegisterRefund(userEmail, payment)
+	if err != nil {
+		logrus.WithError(err).Error("business.payment.register: registering new refund in activity log")
 	}
 
 	if err := p.bank.Transfer(p.Context, accounts.destination, accounts.origin, payment.Amount); err != nil {

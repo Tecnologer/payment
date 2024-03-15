@@ -17,6 +17,7 @@ type PaymentMethod struct {
 	daoCustomer      *dao.Customer
 	daoMerchantUser  *dao.MerchantUser
 	bank             service.Banker
+	daoActivityLog   *dao.ActivityLog
 }
 
 func NewPaymentMethod(db *gorm.DB, ctx context.Context) *PaymentMethod {
@@ -26,6 +27,7 @@ func NewPaymentMethod(db *gorm.DB, ctx context.Context) *PaymentMethod {
 		daoCustomer:      dao.NewCustomer(db),
 		daoMerchantUser:  dao.NewMerchantUser(db),
 		bank:             service.NewBankService(),
+		daoActivityLog:   dao.NewActivityLog(db),
 	}
 }
 
@@ -47,6 +49,11 @@ func (p *PaymentMethod) Create(inputPaymentMethod *models.PaymentMethod) (*model
 	paymentMethod, err := p.daoPaymentMethod.InsertIfNoExists(inputPaymentMethod)
 	if err != nil {
 		return nil, err
+	}
+
+	err = p.daoActivityLog.RegisterNewPaymentMethod(paymentMethod)
+	if err != nil {
+		logrus.WithError(err).Error("business.payment.register: registering new refund in activity log")
 	}
 
 	return paymentMethod, nil
