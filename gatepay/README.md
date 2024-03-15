@@ -99,7 +99,7 @@ Online payment platform API-based application focused on e-commerce businesses t
 - **Headers:** Authorization: Bearer {{auth_token}}
 - **Response:** A list of payments sent (customer) or received (merchant) by the authenticated user.
 
-### 3. Add Payment Method - Customer
+### 3. Add Payment Method
 - **Endpoint:** POST `/add-payment-method`
 - **Description:** Adds a customer's payment method to the authenticated user.
 - **Headers:** Authorization: Bearer {{auth_token}}
@@ -134,4 +134,44 @@ Online payment platform API-based application focused on e-commerce businesses t
         "payment_methods": null
     }
   }
+  ```
+  
+### 4. Get Activity Log
+- **Endpoint:** POST `/get-activity-log`
+- **Description:** Retrieves the activity log with the paginated, sorting and filters specified.
+- **Headers:** Authorization: Bearer {{auth_token}}
+- **Request Body:**
+  ```json
+  {
+    "page": 1,
+    "page_size": 10,
+    "order_by": "created_at desc",
+    "filters": [
+        {
+            "property": "author",
+            "value": "jnommensen@gmail.com",
+            "relational_operator": "=",
+            "logical_operator": "and"
+        }
+    ]
+  }
+  ```
+- **Response:** A list of activity logs with the specified filters.
+  ```json
+  [
+    {
+        "ID": 1,
+        "CreatedAt": "2024-03-14T21:19:57.592125-07:00",
+        "UpdatedAt": "2024-03-14T21:19:57.592125-07:00",
+        "DeletedAt": null,
+        "type": "payment_method",
+        "author": "jnommensen@gmail.com",
+        "action": "create",
+        "detail": {
+            "account": "bbva-123456",
+            "id": 1,
+            "name": "gold"
+        }
+    }
+  ]
   ```
