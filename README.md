@@ -4,7 +4,7 @@ Deuna Payment is a payment gateway that allows you to accept payments from your 
 
 ## Structure
 
-The project is divided into 3 microservices:
+The project is divided into 3 microservices (each README contains more details about end points)
 
 1. [auth](./auth): It's a pretty simple microservice that generates JWT tokens and validates them.
 2. [bank](./bank): It's a microservice that simulates a bank. It allows get accounts and transfers between them.
@@ -55,8 +55,21 @@ The project is divided into 3 microservices:
    # Default port is 8081, if you want to change it, you can use the BANK_PORT env var.
    # If auth is running in a different port, you can use the AUTH_PORT env var.
    make run-bank BANK_PORT=8081 ATH_PORT=8080
-    ``` 
-4. Create the database with Docker
+    ```  
+   
+4. Install and configure the enumer for `go generate`
+   ```shell
+   # install enumer
+   go install github.com/dmarkham/enumer@latest
+   
+   # add the bin folder to the PATH
+   export PATH=$PATH:$GOPATH/bin   
+   ``` 
+5. Run `go generate` to create the enums
+   ```shell
+   go generate ./...
+   ```
+6. Create the database with Docker
    ```shell
    make docker-create-db LOCAL_DB=gatepay \
                          LOCAL_DB_USER=postgres \
@@ -65,7 +78,7 @@ The project is divided into 3 microservices:
                          LOCAL_DB_PORT=5432 \
                          DB_CONTAINER=gatepay-db
     ``` 
-5. Configure Env Vars, Example:
+7. Configure Env Vars, Example:
    ```shell
     export DB_PORT=5432
     export DB_HOST=localhost
@@ -74,12 +87,12 @@ The project is divided into 3 microservices:
     export DB_NAME=gatepay
     export DB_SSL_MODE=disable
    ```
-6. Build and Run the [migrations](./gatepay/migrator)
+8. Build and Run the [migrations](./gatepay/migrator)
    ```shell
    make build-migrator 
    make run-migrator
    ``` 
-7. Run the [gatepay](./gatepay) microservice
+9. Run the [gatepay](./gatepay) microservice
    ```shell
    make build-gatepay
    # Default port is 8082, if you want to change it, you can use the GATEPAY_PORT env var.
