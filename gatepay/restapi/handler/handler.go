@@ -257,16 +257,6 @@ func (h *PaymentHandler) GetActivityLog(w http.ResponseWriter, r *http.Request) 
 
 	ctx := httputils.ContextWithToken(r.Context(), r.Header.Get("Authorization"))
 
-	userEmail, err := h.EmailFromToken(r)
-	if err != nil {
-		logrus.WithError(err).Error("handler.payment.get_activity_log: getting token user")
-		httputils.WriteUnauthorized(w, errors.Wrap(err, "getting token user"))
-
-		return
-	}
-
-	paginationRequest.Filters = append(paginationRequest.Filters, activityLog.FilterByUserEmail(userEmail))
-
 	activityLogs, err := business.NewActivityLog(cnn, ctx).Retrieve(paginationRequest)
 	if err != nil {
 		logrus.WithError(err).Error("handler.payment.get_activity_log: getting activity log")
