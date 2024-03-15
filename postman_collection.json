@@ -109,17 +109,8 @@
 								}
 							]
 						},
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"tecnologer\",\n    \"password\": \"S3cre3t**123\"\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{auth_url}}/validate",
 							"host": [
@@ -422,6 +413,15 @@
 						},
 						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{gatepay_url}}/refund-payment/1",
 							"host": [
@@ -430,6 +430,78 @@
 							"path": [
 								"refund-payment",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-activity-log-customer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"page\": 1,\n    \"page_size\": 10,\n    \"order_by\": \"created_at\",\n    \"filters\": [\n        {\n            \"property\": \"author\",\n            \"value\": \"jnommensen@gmail.com\",\n            \"relational_operator\": \"=\",\n            \"logical_operator\": \"and\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatepay_url}}/get-activity-log",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"get-activity-log"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-activity-log-merchant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"page\": 1,\n    \"page_size\": 10,\n    \"sort_by\": \"CreatedAt\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gatepay_url}}/get-activity-log",
+							"host": [
+								"{{gatepay_url}}"
+							],
+							"path": [
+								"get-activity-log"
 							]
 						}
 					},
