@@ -1,4 +1,5 @@
 FROM golang:1.22-bullseye
+USER nonroot
 
 # set the environment variable for port
 ENV PORT=80
