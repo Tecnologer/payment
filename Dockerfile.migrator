@@ -21,7 +21,7 @@ RUN go install github.com/dmarkham/enumer@latest
 RUN go generate ./...
 
 # install netcat, used in the wait-for-it.sh script
-RUN apt-get update && apt-get install -y netcat
+RUN apt-get update && apt-get --no-install-recommends install -y netcat
 
 RUN chmod +x /wait-for-it.sh
 
